@@ -1,0 +1,20 @@
+digraph G{
+node [color=black, shape=box, style="rounded, filled"];
+size [fillcolor="#FFFEB6", label="SIZE = 1"];
+node [color=black, shape=box, style="rounded, filled"];
+
+edge [style=solid, constraint=false];
+node0 [fillcolor="#C0C0C0", label="From Pushkino"];
+edge [color="red", label="YES"]; node0 -> node1;
+node1 [fillcolor="#98FF98", label="Vitek"];
+edge [color="blue", label="NO"]; node0 -> node2;
+node2 [fillcolor="#FFB2D0", label="The best mentor"];
+edge [color="red", label="YES"]; node2 -> node3;
+node3 [fillcolor="#98FF98", label="Demqa"];
+edge [color="blue", label="NO"]; node2 -> node4;
+node4 [fillcolor="#FFB2D0", label="Zhivotnoe"];
+edge [color="red", label="YES"]; node4 -> node5;
+node5 [fillcolor="#98FF98", label="Paltarashka"];
+edge [color="blue", label="NO"]; node4 -> node6;
+node6 [fillcolor="#98FF98", label="Gukas"];
+}

@@ -6,9 +6,9 @@ int TreeCtor(Tree_t* tree)
 {
 	if (tree == NULL) return TREE_NULL_PTR;
 	
-	tree->root   == NULL;
-	tree->size   == 0;
-	tree->status == TREE_IS_OK;
+	tree->root   = NULL;
+	tree->size   = 0;
+	tree->status = TREE_IS_OK;
 
 	return TREE_IS_OK;
 }
@@ -163,31 +163,35 @@ int TreeVerify(Tree_t* tree)
 
     return status;
 }
-void NodeDump(TreeNode_t* node, size_t* nodeCount, FILE* file)
+void NodeDump(Tree_t* tree, TreeNode_t* node, size_t* nodeCount, FILE* file)
 {
-	ASSERT(node != NULL && nodeCount != NULL && file != NULL)
+	ASSERT(tree != NULL && node != NULL && nodeCount != NULL && file != NULL)
 	
-	fprintf(file, "node%lu [fillcolor=", *nodeCount);
-	if	    (*nodeCount == 0)			                fprintf(file, "\"#C0C0C0\"");
-	else if (node->left == NULL && node->right == NULL) fprintf(file, "\"#98FF98\"");
-	else										        fprintf(file, "\"#FFB2D0\"");
-	fprintf(file, ", label=\"%s\"];\n", node->value);
+	if (*nodeCount > tree->size) return;
+	
+	++(*nodeCount);
 
-	size_t curNodeIndex = *nodeCount;
+	fprintf(file, "\"%s\" [fillcolor=", node->value);
+
+	if	    (*nodeCount == 1)			                fprintf(file, "\"#C0C0C0\"];\n");
+	else if (node->left == NULL && node->right == NULL) fprintf(file, "\"#98FF98\"];\n");
+	else										        fprintf(file, "\"#FFB2D0\"];\n");
 
 	if (node->left != NULL)
 	{
-		++(*nodeCount);
-		fprintf(file, "edge [color=\"red\", label=\"YES\"]; node%lu -> node%lu;\n", curNodeIndex, *nodeCount);
-		NodeDump(node->left, nodeCount, file);
+		fprintf(file, "\"%s\" -> \"%s\" [color=\"red\", label=\"YES\"]\n", node->value, node->left->value);
 	}
 
 	if (node->right != NULL)
 	{
-		++(*nodeCount);
-		fprintf(file, "edge [color=\"blue\", label=\"NO\"]; node%lu -> node%lu;\n", curNodeIndex, *nodeCount);
-		NodeDump(node->right, nodeCount, file);
+		fprintf(file, "\"%s\" -> \"%s\" [color=\"blue\", label=\"NO\"]\n", node->value, node->right->value);
 	}
+
+	if (node->left  != NULL) 
+		NodeDump(tree, node->left,  nodeCount, file);
+
+    if (node->right != NULL)
+		NodeDump(tree, node->right, nodeCount, file);
 }
 
 void TreeDump(Tree_t* tree)
@@ -207,13 +211,9 @@ void TreeDump(Tree_t* tree)
                      "label=\"SIZE = %lu\"];\n",
                       tree->size);
     
-    fprintf(DumpFile, "node [color=black, shape=box, style=\"rounded, filled\"];\n");
-    fprintf(DumpFile, "\n");
-    fprintf(DumpFile, "edge [style=solid, constraint=false];\n");
-	
 	size_t nodeCount = 0;
 
-	NodeDump(tree->root, &nodeCount, DumpFile);
+	NodeDump(tree, tree->root, &nodeCount, DumpFile);
 
     fprintf(DumpFile, "}\n");
     

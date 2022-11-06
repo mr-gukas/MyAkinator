@@ -76,7 +76,7 @@ struct Tree_t
 
 void MakePngName(char* name, char num);
 void TreeDump(Tree_t* tree);
-void NodeDump(TreeNode_t* node, size_t* nodeCount, FILE* file);
+void NodeDump(Tree_t* tree, TreeNode_t* node, size_t* nodeCount, FILE* file);
 int TreeVerify(Tree_t* tree);
 int TreePrint(TreeNode_t* root, FILE* stream, size_t tabCount=0);
 int TrNodeRemove(Tree_t* tree, TreeNode_t* node);

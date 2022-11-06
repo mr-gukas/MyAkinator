@@ -8,15 +8,6 @@ int main(void)
 {
 	Tree_t* tree = DataDownload();
 	
-	/*FILE* data = fopen("obj/database", "w");
-	TreePrint(tree->root, data);
-	fclose(data);
-	
-	TreeDump(tree);
-
-	TreeCleaning(tree->root);
-	free(tree);
-	*/
 	int choice = 0;
 
 	while ((choice = MainMenu()) != 'q' && choice != 'e')
@@ -24,6 +15,7 @@ int main(void)
 		switch (choice)
 		{
 			case 'g': GuessCharacter(tree); break;
+			case 'd': GetDefinition(tree);  break;
 			case 'v': TreeDump(tree);       break;
 			default: break;
 		}
@@ -52,7 +44,7 @@ int MainMenu(void)
 {
     int choice = 0;
 
-    puts("****Select mode:\n"
+    puts("\n****Select mode:\n"
 		 "[g]uess the character\n"
 		 "[d]efinition\n"
 		 "[c]omparison\n"
@@ -228,8 +220,13 @@ int GuessCharacter(Tree_t* tree)
 				break;
 		}	
 		
-		if (choice == 'y')	curNode = curNode->left;
-		else				curNode = curNode->right;
+		if (choice == 'y')	
+		{
+			curNode = curNode->left;
+			StackPop(&questionStk);
+		}
+		else 
+			curNode = curNode->right;
 
 	}
 	
@@ -259,7 +256,7 @@ int AddInBase(TreeNode_t* curNode)
 	fgets(newCharacter, STR_MAX_SIZE - 1, stdin);
 	
 	size_t last = strlen(newCharacter) - 1;
-	if (newCharacter[last] = '\n')	
+	if (newCharacter[last] == '\n')	
 		newCharacter[last] = '\0';	
 	
 	TreeNode_t* newLeft  = MakeNode(newCharacter);
@@ -272,7 +269,7 @@ int AddInBase(TreeNode_t* curNode)
 	fgets(difference, STR_MAX_SIZE - 1, stdin);
 	
 	last = strlen(difference) - 1;
-	if (difference[last] = '\n')	
+	if (difference[last] == '\n')	
 		difference[last] = '\0';	
 
 	while (strstr(difference, "Not") != NULL)
@@ -291,10 +288,130 @@ int AddInBase(TreeNode_t* curNode)
 	return STATUS_OK;
 }
 
+int GetDefinition(Tree_t* tree)
+{
+	if (tree == NULL) return NULL_TREE;
 
+	printf("Who do you want to know the whole truth about?\n");
 
+	char object[STR_MAX_SIZE] = "";
 
+	fgets(object, STR_MAX_SIZE - 1, stdin);
 
+	size_t last = strlen(object) - 1;
+	if (object[last] == '\n')	
+		object[last] = '\0';
+	
+	Stack_t routeStk = {};
+	StackCtor(&routeStk, 10);
+	
+	size_t count = 0;
+	
+	int findResult = FindObject(object, tree, tree->root, &count, &routeStk);
 
+	switch (findResult)
+	{
+		case NON_EXISTABLE_OBJ: printf("I'm sorry but I do not know who is it...\n"); break;
+		case STATUS_OK:         PrintDefinition(&routeStk); break;
+		default:                printf("There are some problems with this opeartion...\n"); break;
+	}
+	
+	StackDtor(&routeStk);
 
+	return STATUS_OK;
+}
+
+int FindObject(char* object, Tree_t* tree, TreeNode_t* node, size_t* count, Stack_t* routeStk)
+{
+	if (!object && !tree && !node && !count && !routeStk) return WRONG_DATA;
+	
+	if (*count > tree->size) return NON_EXISTABLE_OBJ;
+	
+	++(*count);
+	StackPush(routeStk, node);
+	
+	if (node->left == NULL && node->right == NULL)
+	{
+		if (strcmp(node->value, object) == 0)
+		{
+			StackPush(routeStk, node);
+			return STATUS_OK;
+		}
+		else
+		{
+			StackPush(routeStk, NULL);
+			return STATUS_OK;
+		}
+	}
+
+	if (node->left)
+	{
+		StackPush(routeStk, node);
+		FindObject(object, tree, node->left, count, routeStk);
+	}
+	
+	TreeNode_t* last = StackPop(routeStk);
+	if (last != NULL)
+	{
+		StackPush(routeStk, last);
+
+		return STATUS_OK;
+	}
+	
+	StackPop(routeStk);
+	StackPop(routeStk);
+
+	if (node->right)
+	{
+		StackPush(routeStk, NULL);
+
+		FindObject(object, tree, node->right, count, routeStk); 
+	}
+
+	last = StackPop(routeStk);
+	if (last != NULL)
+	{
+		StackPush(routeStk, last);
+		return STATUS_OK;
+	}
+	
+	StackPop(routeStk);
+	StackPop(routeStk);
+	StackPush(routeStk, NULL);
+
+	return NON_EXISTABLE_OBJ;
+	
+}
+
+int PrintDefinition(Stack_t* routeStk)
+{
+	if (routeStk == NULL) return WRONG_DATA;
+	
+	StackPop(routeStk);
+	TreeNode_t* object = StackPop(routeStk);
+	printf("%s is ", object->value);
+
+	Stack_t reverseRoute = {};
+	StackCtor(&reverseRoute, routeStk->size);
+	
+	while (routeStk->size != 0)
+	{
+		StackPush(&reverseRoute, StackPop(routeStk));
+	}
+	
+	while (reverseRoute.size != 0)
+	{
+		TreeNode_t* curNode = StackPop(&reverseRoute);
+
+		if (StackPop(&reverseRoute) == NULL)
+			printf("not ");
+
+		printf("%s", curNode->value);
+		printf((reverseRoute.size == 0) ? "\n" : ", ");
+		
+	}
+	
+	StackDtor(&reverseRoute);
+	return STATUS_OK;
+}
 	

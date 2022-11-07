@@ -1,13 +1,17 @@
 digraph G{
 node [color=black, shape=box, style="rounded, filled"];
-size [fillcolor="#FFFEB6", label="SIZE = 11"];
+size [fillcolor="#FFFEB6", label="SIZE = 17"];
 "From Pushkino" [fillcolor="#C0C0C0"];
 "From Pushkino" -> "Vitek" [color="red", label="YES"]
 "From Pushkino" -> "The best mentor" [color="blue", label="NO"]
 "Vitek" [fillcolor="#98FF98"];
 "The best mentor" [fillcolor="#FFB2D0"];
-"The best mentor" -> "Demqa" [color="red", label="YES"]
+"The best mentor" -> "Jedi" [color="red", label="YES"]
 "The best mentor" -> "Zhivotnoe" [color="blue", label="NO"]
+"Jedi" [fillcolor="#FFB2D0"];
+"Jedi" -> "Obi Van" [color="red", label="YES"]
+"Jedi" -> "Demqa" [color="blue", label="NO"]
+"Obi Van" [fillcolor="#98FF98"];
 "Demqa" [fillcolor="#98FF98"];
 "Zhivotnoe" [fillcolor="#FFB2D0"];
 "Zhivotnoe" -> "Kashachiy Morda" [color="red", label="YES"]
@@ -19,7 +23,15 @@ size [fillcolor="#FFFEB6", label="SIZE = 11"];
 "Paltarashka" [fillcolor="#98FF98"];
 "Zasranec" [fillcolor="#FFB2D0"];
 "Zasranec" -> "Ars" [color="red", label="YES"]
-"Zasranec" -> "Gukas" [color="blue", label="NO"]
+"Zasranec" -> "Pepper" [color="blue", label="NO"]
 "Ars" [fillcolor="#98FF98"];
+"Pepper" [fillcolor="#FFB2D0"];
+"Pepper" -> "Mega pepper" [color="red", label="YES"]
+"Pepper" -> "Gukas" [color="blue", label="NO"]
+"Mega pepper" [fillcolor="#FFB2D0"];
+"Mega pepper" -> "Sanechka" [color="red", label="YES"]
+"Mega pepper" -> "Vlados Cat Nose" [color="blue", label="NO"]
+"Sanechka" [fillcolor="#98FF98"];
+"Vlados Cat Nose" [fillcolor="#98FF98"];
 "Gukas" [fillcolor="#98FF98"];
 }

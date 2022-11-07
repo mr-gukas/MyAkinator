@@ -7,8 +7,10 @@
 int main(void)
 {
 	Tree_t* tree = DataDownload();
-	
+
 	int choice = 0;
+
+	AkinPrint("Hello, I am Akinator! Choose the game mode and let us go play!\n");
 
 	while ((choice = MainMenu()) != 'q' && choice != 'e')
     {
@@ -17,9 +19,9 @@ int main(void)
 			case 'g': GuessCharacter(tree); break;
 			case 'd': GetDefinition(tree);  break;
 			case 'v': TreeDump(tree);       break;
+			case 'c': GetComparison(tree);  break;
 			default: break;
 		}
-
 	}
 	
 	if (choice == 'q')
@@ -27,7 +29,7 @@ int main(void)
 		DataUpload(tree);
 	}
 
-    puts("The program is completed");
+    AkinPrint("The program is completed. Goodbye!\n");
 
 	TreeCleaning(tree->root);
 	free(tree);
@@ -36,21 +38,22 @@ int main(void)
     endLog(LogFile);
 #endif
 
-
 	return 0;
 }
 
 int MainMenu(void)
 {
     int choice = 0;
+	
+	printf("\n\n****");
+    AkinPrint("Select mode:\n");
 
-    puts("\n****Select mode:\n"
-		 "[g]uess the character\n"
-		 "[d]efinition\n"
-		 "[c]omparison\n"
-		 "[v]isualize the database\n"
-		 "[q]uit the program\n"
-		 "[e]xit without saving\n");
+	printf("[g]uess the character\n"
+		   "[d]efinition\n"
+		   "[c]omparison\n"
+		   "[v]isualize the database\n"
+		   "[q]uit the program\n"
+		   "[e]xit without saving\n\n");
 
     while ((choice = getchar()) != EOF)
     {
@@ -59,7 +62,7 @@ int MainMenu(void)
 
 		if (strchr("gdcvqe", choice) == NULL)
 		{
-			puts("Invalid value entered. Enter 'e', 'g', 'd', 'c', 'v', or 'q':\n");
+			AkinPrint("Invalid value entered. Enter e, g, d, c, v, or q:\n");
 		}
 
 		else
@@ -68,7 +71,7 @@ int MainMenu(void)
 
 	if (choice == EOF)
 	{
-        printf("The end of the file has been reached\n");
+        AkinPrint("The end of the file has been reached\n");
         choice = 'e';
     }
 
@@ -80,7 +83,7 @@ Tree_t* DataDownload(void)
 	FILE* data = fopen("obj/database", "r");
 	if (data == NULL)
 	{
-		fprintf(stderr, "I can't connect to the database\n");
+		AkinPrint("I can not connect to the database\n");
 		return NULL;
 	}
 
@@ -90,7 +93,7 @@ Tree_t* DataDownload(void)
 	TEXT dataBase = {};
 	textCtor(&dataBase, data);
 	fclose(data);
-	
+
 	ReadTree(&dataBase, tree);
 
 	textDtor(&dataBase);
@@ -122,7 +125,6 @@ int ReadTree(TEXT* database, Tree_t* tree)
 		StackDtor(&parentStk);
 		return STATUS_OK;
 	}
-	
 		
 	for (size_t index = 1; index < database->nLines; ++index)
 	{
@@ -205,9 +207,8 @@ int GuessCharacter(Tree_t* tree)
 	{
 		StackPush(&questionStk, curNode);
 
-		printf("Is/Does it %s?\n"
-				"\t[y]es\n"
-				"\t[n]o\n", curNode->value);
+		AkinPrint("Is it %s?", curNode->value);
+		printf("\n\t[y]es\n\t[n]o\n");
 
 		while ((choice = getchar()) != EOF)
 		{
@@ -215,7 +216,7 @@ int GuessCharacter(Tree_t* tree)
 				continue;
 
 			if (strchr("yn", choice) == NULL)
-				puts("Invalid value entered. Enter 'y', or 'n':\n");
+				AkinPrint("Invalid value entered. Enter y, or n:\n");
 			else
 				break;
 		}	
@@ -223,68 +224,56 @@ int GuessCharacter(Tree_t* tree)
 		if (choice == 'y')	
 		{
 			curNode = curNode->left;
-			StackPop(&questionStk);
 		}
 		else 
 			curNode = curNode->right;
-
 	}
 	
 	curNode = StackPop(&questionStk);
 	if (choice == 'y')
 	{
-		printf("Hurray! I guessed your character! This is %s\n", curNode->value);
+		AkinPrint("Hurray! I guessed your character! This is %s\n", curNode->value);
 		
 		StackDtor(&questionStk);
 		return STATUS_OK;
 	}
 	
-	AddInBase(curNode);
+	AddInBase(tree, curNode);
 	
 	StackDtor(&questionStk);
 
 	return STATUS_OK;
 }
 
-int AddInBase(TreeNode_t* curNode)
+int AddInBase(Tree_t* tree, TreeNode_t* curNode)
 {
 	if (curNode == NULL) return NULL_NODE;
+	if (tree    == NULL) return NULL_TREE;
 	
-	printf ("Okay, who was that?\n");
+	AkinPrint("Okay, who was that?\n");
 
 	char newCharacter[STR_MAX_SIZE] = "";
-	fgets(newCharacter, STR_MAX_SIZE - 1, stdin);
-	
-	size_t last = strlen(newCharacter) - 1;
-	if (newCharacter[last] == '\n')	
-		newCharacter[last] = '\0';	
-	
-	TreeNode_t* newLeft  = MakeNode(newCharacter);
-	TreeNode_t* newRight = MakeNode(curNode->value);
+	ReadName(newCharacter);
 
-	printf ("How does %s differ from the %s\n"
-			"(Try to describe without using \"Not\"):\n", newLeft->value, curNode->value);
+	TrNodeInsert(tree, curNode, newCharacter, LEFT);
+	TrNodeInsert(tree, curNode, curNode->value, RIGHT);
+
+	AkinPrint("How does %s differ from the %s\n (Try to describe without using \"Not\"):\n", 
+			newCharacter, curNode->value);
 
 	char difference[STR_MAX_SIZE] = "";
-	fgets(difference, STR_MAX_SIZE - 1, stdin);
-	
-	last = strlen(difference) - 1;
-	if (difference[last] == '\n')	
-		difference[last] = '\0';	
+	ReadName(difference);
 
 	while (strstr(difference, "Not") != NULL)
 	{
-		printf("Try to describe without using \"Not\":\n");
+		AkinPrint("Try to describe without using \"Not\":\n");
 		fgets(difference, STR_MAX_SIZE - 1, stdin);
 	}
 	
 	strncpy(curNode->value, difference, STR_MAX_SIZE - 1);
 	
-	curNode->left  = newLeft;
-	curNode->right = newRight;
-
-	printf("Thanks for the help! Now I know about %s\n", curNode->left->value);
-
+	AkinPrint("Thanks for the help! Now I know about %s\n", curNode->left->value);
+	
 	return STATUS_OK;
 }
 
@@ -292,16 +281,11 @@ int GetDefinition(Tree_t* tree)
 {
 	if (tree == NULL) return NULL_TREE;
 
-	printf("Who do you want to know the whole truth about?\n");
+	AkinPrint("Who do you want to know the whole truth about?\n");
 
 	char object[STR_MAX_SIZE] = "";
+	ReadName(object);
 
-	fgets(object, STR_MAX_SIZE - 1, stdin);
-
-	size_t last = strlen(object) - 1;
-	if (object[last] == '\n')	
-		object[last] = '\0';
-	
 	Stack_t routeStk = {};
 	StackCtor(&routeStk, 10);
 	
@@ -311,9 +295,9 @@ int GetDefinition(Tree_t* tree)
 
 	switch (findResult)
 	{
-		case NON_EXISTABLE_OBJ: printf("I'm sorry but I do not know who is it...\n"); break;
+		case NON_EXISTABLE_OBJ: AkinPrint("I am sorry but I do not know who is it...\n"); break;
 		case STATUS_OK:         PrintDefinition(&routeStk); break;
-		default:                printf("There are some problems with this opeartion...\n"); break;
+		default:                AkinPrint("There are some problems with this opeartion...\n"); break;
 	}
 	
 	StackDtor(&routeStk);
@@ -364,7 +348,6 @@ int FindObject(char* object, Tree_t* tree, TreeNode_t* node, size_t* count, Stac
 	if (node->right)
 	{
 		StackPush(routeStk, NULL);
-
 		FindObject(object, tree, node->right, count, routeStk); 
 	}
 
@@ -383,35 +366,222 @@ int FindObject(char* object, Tree_t* tree, TreeNode_t* node, size_t* count, Stac
 	
 }
 
+
 int PrintDefinition(Stack_t* routeStk)
 {
 	if (routeStk == NULL) return WRONG_DATA;
 	
 	StackPop(routeStk);
 	TreeNode_t* object = StackPop(routeStk);
-	printf("%s is ", object->value);
-
+	AkinPrint("%s is ", object->value);
+	
 	Stack_t reverseRoute = {};
 	StackCtor(&reverseRoute, routeStk->size);
-	
-	while (routeStk->size != 0)
-	{
-		StackPush(&reverseRoute, StackPop(routeStk));
-	}
+
+	ReverseStack(routeStk, &reverseRoute);
 	
 	while (reverseRoute.size != 0)
 	{
 		TreeNode_t* curNode = StackPop(&reverseRoute);
 
 		if (StackPop(&reverseRoute) == NULL)
-			printf("not ");
+			AkinPrint("not ");
 
-		printf("%s", curNode->value);
+		AkinPrint("%s", curNode->value);
 		printf((reverseRoute.size == 0) ? "\n" : ", ");
-		
 	}
 	
 	StackDtor(&reverseRoute);
 	return STATUS_OK;
 }
+
+Stack_t* ReverseStack(Stack_t* stk, Stack_t* reverseStk)
+{
+	if (stk == NULL) return NULL;
+
+	while (stk->size != 0)
+	{
+		StackPush(reverseStk, StackPop(stk));
+	}
+
+	return reverseStk;
+}
 	
+int GetComparison(Tree_t* tree)
+{
+	if (tree == NULL) return NULL_TREE;
+	
+	AkinPrint("Enter the name of the first object:\n");
+	
+	char object1[STR_MAX_SIZE] = "";
+	ReadName(object1);
+	
+	Stack_t reverse1 = {};
+	if (MakeRoute(object1, tree, tree->root, &reverse1))
+	{
+		AkinPrint("Error in first object. Stopped!\n");
+		StackDtor(&reverse1);
+		
+		return NON_EXISTABLE_OBJ;
+	}
+
+	AkinPrint("Enter the name of the second object:\n");
+	
+	char object2[STR_MAX_SIZE] = "";
+	ReadName(object2);
+	
+	Stack_t reverse2 = {};
+	if (MakeRoute(object2, tree, tree->root, &reverse2))
+	{
+		AkinPrint("Error in second object. Stopped!\n");
+		StackDtor(&reverse1);
+		StackDtor(&reverse2);
+		
+		return NON_EXISTABLE_OBJ;
+	}
+
+	RouteCmp(&reverse1, &reverse2, object1, object2);
+
+	StackDtor(&reverse1);
+	StackDtor(&reverse2);
+
+	return STATUS_OK;
+}	
+
+int ReadName(char* name)
+{
+	if (name == NULL) return WRONG_DATA;
+	
+	fgets(name, STR_MAX_SIZE - 1, stdin);
+
+	size_t last = strlen(name) - 1;
+	if (name[last] == '\n')	
+		name[last] = '\0';
+
+	return STATUS_OK;
+}
+
+int MakeRoute(char* object, Tree_t* tree, TreeNode_t* node, Stack_t* reverse)
+{
+	if (!object && !tree && !node && !reverse) return WRONG_DATA;
+
+	Stack_t stk = {};
+	StackCtor(&stk, 10);
+	
+	size_t count = 0;
+	
+	int findResult = FindObject(object, tree, tree->root, &count, &stk);	
+	
+	if (findResult != STATUS_OK)
+	{
+		StackDtor(&stk);
+		return findResult;
+	}
+
+	StackPop(&stk);
+	StackPop(&stk);
+
+	StackCtor(reverse, stk.size);
+	ReverseStack(&stk, reverse);
+
+	StackDtor(&stk);
+
+	return STATUS_OK;
+}
+
+int RouteCmp(Stack_t* route1, Stack_t* route2, char* object1, char* object2)
+{
+	if (route1 == NULL || route2 == NULL) return WRONG_DATA;
+	
+	int common = 0;
+
+
+	AkinPrint("\nThey both are...\n");
+	while (route1->size != 0 && route2->size != 0)
+	{
+		TreeNode_t* node1 = StackPop(route1);
+		TreeNode_t* node2 = StackPop(route2);
+		
+		TreeNode_t* ans1 = StackPop(route1);
+		TreeNode_t* ans2 = StackPop(route2);
+
+		if (ans1 == ans2 && node1 == node2)
+		{
+			common = 1;
+
+			if (ans1 == NULL) 
+				AkinPrint("not ");
+			AkinPrint("%s, ", node1->value);
+		}
+		else 
+		{
+			if (!common)
+			{
+				AkinPrint("\nOhh, sorry... They have no common features\n");
+			}
+
+			AkinPrint("\nBut %s is ", object1);
+			if (ans1 == NULL) 
+				AkinPrint("not ");
+
+			AkinPrint("%s", node1->value);
+
+			AkinPrint(", and %s is ", object2);
+			if (ans2 == NULL) 
+				AkinPrint("not ");
+
+			AkinPrint("%s", node2->value);
+		}
+	}
+	
+	if (route2->size == 0 && route1->size != 0)
+	{
+		AkinPrint("\nAlso %s is ", object1);
+		while (route1->size != 0)
+		{
+			TreeNode_t* curNode = StackPop(route1);
+
+			if (StackPop(route1) == NULL)
+				AkinPrint("not ");
+
+			AkinPrint("%s", curNode->value);
+			printf((route1->size == 0) ? "\n" : ", ");
+		}
+	}
+	else if (route1->size == 0 && route2->size != 0)
+	{
+		AkinPrint("\nAlso %s is ", object2);
+		while (route2->size != 0)
+		{
+			TreeNode_t* curNode = StackPop(route2);
+
+			if (StackPop(route2) == NULL)
+				AkinPrint("not ");
+
+			AkinPrint("%s", curNode->value);
+			printf((route2->size == 0) ? "\n" : ", ");
+		}	
+	}
+
+	return STATUS_OK;
+}
+
+void AkinPrint(char text[TEXT_SIZE], ...)
+{
+	char festText[TEXT_SIZE * 2] = "";
+
+	char* akinText = (char*) calloc(TEXT_SIZE, sizeof(char));
+
+	va_list arg = {};
+    va_start (arg, text);
+	
+	vsprintf(akinText, text, arg);
+	sprintf(festText, "echo \"%s\" | festival --tts", akinText);
+	
+	printf(akinText);
+	system(festText);
+
+    va_end (arg);
+
+	free(akinText);
+}

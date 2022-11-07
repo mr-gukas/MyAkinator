@@ -64,8 +64,6 @@ TreeNode_t* TrNodeInsert(Tree_t* tree, TreeNode_t* node, const Val_t* value, Ins
 	
 	TreeNode_t* curNode = MakeNode(value);	
 
-	strcpy(curNode->value, value);
-	
 	if (tree->root == node && tree->size == 0)
 	{
 		tree->root = curNode;
@@ -160,7 +158,7 @@ int TreeVerify(Tree_t* tree)
 	if (tree->root             == NULL)               return TREE_ROOT_IS_NULL;
 
     int status = TREE_IS_OK;
-
+ 
     return status;
 }
 void NodeDump(Tree_t* tree, TreeNode_t* node, size_t* nodeCount, FILE* file)

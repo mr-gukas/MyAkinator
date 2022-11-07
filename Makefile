@@ -2,4 +2,4 @@ CPPFLAGS := -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-
 
 
 all:
-	g++ $(CPPFLAGS)  akinator.cpp filework/filework.cpp stack/stack.cpp tree/tree.cpp log/LOG.cpp -o obj/tree.out
+	g++ $(CPPFLAGS)  akinator.cpp filework/filework.cpp stack/stack.cpp tree/tree.cpp log/LOG.cpp -o obj/akinator

@@ -1,7 +1,10 @@
 { "From Pushkino"
 	{ "Vitek" }
 	{ "The best mentor"
-		{ "Demqa" }
+		{ "Jedi"
+			{ "Obi Van" }
+			{ "Demqa" }
+		 }
 		{ "Zhivotnoe"
 			{ "Kashachiy Morda"
 				{ "Dimas Globin" }
@@ -9,7 +12,13 @@
 			 }
 			{ "Zasranec"
 				{ "Ars" }
-				{ "Gukas" }
+				{ "Pepper"
+					{ "Mega pepper"
+						{ "Sanechka" }
+						{ "Vlados Cat Nose" }
+					 }
+					{ "Gukas" }
+				 }
 			 }
 		 }
 	 }
